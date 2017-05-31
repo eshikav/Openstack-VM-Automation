@@ -1,0 +1,18 @@
+webservers:
+     - start: 1
+       number: 2
+     - cloud: shivsCloud
+       state: present
+       image: 5f72e053-77a3-4496-bed4-4ab23a05acb3
+       key_name: mykey
+       flavor: m1.nano
+       network: f531de7f-469c-49b6-a4b3-59bced8eac49
+       security_groups: default
+       timeout: 500
+       disk: ['vda','vdb']
+       disk_size: 5
+       wait: "yes"
+
+database:
+     - cpucount: 2
+     - memcount: 3

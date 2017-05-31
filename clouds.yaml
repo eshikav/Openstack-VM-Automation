@@ -1,0 +1,10 @@
+clouds:
+  shivsCloud:
+    auth:
+      auth_url: < Openstack keystone endpoint >
+      password: < password of the user >
+      project_name: < Project name of the user >
+      username: < Username >
+      user_domain_name: < domain name >
+      project_domain_name: < project domain name >
+    region_name: < region name >

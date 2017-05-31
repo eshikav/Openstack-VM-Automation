@@ -1,0 +1,54 @@
+- hosts: 127.0.0.1
+  vars_files: 
+      - vars.yml
+  tasks:
+    - name: Spinning up the instances
+      os_server:
+        cloud: "{{ webservers[1].cloud }}"
+        state: "{{ webservers[1].state }}"
+        name: webservers{{ item }}
+        image: "{{ webservers[1].image }}"
+        key_name: "{{ webservers[1].key_name }}"
+        flavor: "{{ webservers[1].flavor }}"
+        network: "{{ webservers[1].network }}"
+        security_groups: "{{ webservers[1].security_groups }}"
+        timeout: "{{ webservers[1].timeout }}"
+        wait: "{{ webservers[1].wait }}"
+      register: spin
+      with_sequence: start={{ webservers[0].start }} end={{ webservers[0].number }}
+
+    - name: Capturing the data of the Instances
+      json_create: file=web_nodes.json data={{ spin.results }}
+
+    - name: create a volume
+      os_volume:
+             state: present
+             cloud: "{{ webservers[1].cloud }}"
+             size: "{{ webservers[1].disk_size }}"
+             display_name: "volume-{{ item.0 }}-{{ item.1 }}"
+      register: vol
+      with_nested:
+          - "{{ lookup('file','/root/web_nodes.json') | from_json|json_query('data[*].server.id') }}"
+          - "{{ webservers[1].disk }}"
+
+    - name: create a volume
+      os_server_volume:
+        state: present
+        cloud: "{{ webservers[1].cloud }}"
+        server: "{{ item.0 }}"
+        volume: "volume-{{ item.0 }}-{{ item.1 }}"
+        device: /dev/{{ item.1 }}
+      register: vol
+      with_nested:
+          - "{{ lookup('file','/root/web_nodes.json') | from_json|json_query('data[*].server.id') }}"
+          - "{{ webservers[1].disk }}"
+
+    - name: Capturing the data of the Instances
+      json_create: file=web_nodes.json data={{ spin.results }}
+ 
+    - name: Capturing the data of the Volumes
+      json_create: file=volume_nodes.json data={{ vol.results }}
+
+
+
+
